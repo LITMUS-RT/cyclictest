@@ -1,3 +1,22 @@
+# cyclictest for LITMUS^RT
+
+This branch of the the RT-Tests repository (see below) adds `cyclictest_litmus`, a version of `cyclictest` that has been modified to run under LITMUS^RT, as described in the paper:
+
+- F. Cerqueira and B. Brandenburg, "A Comparison of Scheduling Latency in
+  Linux, PREEMPT-RT, and LITMUS^RT",
+  *Proceedings of the 9th Annual Workshop on Operating Systems Platforms for
+  Embedded Real-Time applications* (OSPERT 2013), pp. 19-29, July 2013. [PDF](https://www.mpi-sws.org/~bbb/papers/pdf/ospert13.pdf)
+
+Use under partitioned schedulers:
+
+    cyclictest_litmus -i $INTERVAL -D $TIMEOUT -m -a -t $NUM_CPUS -n -N -v
+
+Use under global schedulers:
+
+    cyclictest_litmus -i $INTERVAL -D $TIMEOUT -m -t $NUM_CPUS -n -N -v
+
+(The original README follows.)
+
 # RT-Tests
 
 This repository contains some programs that test various rt-linux features.

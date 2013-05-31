@@ -1,12 +1,23 @@
+# Where is the LITMUS^RT userspace library source tree?
+LIBLITMUS ?= ../liblitmus
+
+# Include default configuration from liblitmus
+# Liblitmus must have been built before ft_tools can be built.
+include ${LIBLITMUS}/inc/config.makefile
+
+# dependency discovery
+include ${LIBLITMUS}/inc/depend.makefile
+
 VERSION_STRING = 0.85
 
 sources = cyclictest.c signaltest.c pi_stress.c rt-migrate-test.c	\
 	  ptsematest.c sigwaittest.c svsematest.c pmqtest.c sendme.c 	\
-	  pip_stress.c hackbench.c
+	  pip_stress.c hackbench.c cyclictest_litmus.c
 
 TARGETS = $(sources:.c=)
 
 LIBS 	= -lrt -lpthread -lrttest -L.
+LIBS 	+= $(LDLIBS)
 EXTRA_LIBS ?= -ldl	# for get_cpu
 DESTDIR	?=
 prefix  ?= /usr/local
@@ -20,9 +31,7 @@ ifneq ($(filter x86_64 i386 ia64 mips powerpc,$(machinetype)),)
 NUMA 	:= 1
 endif
 
-CFLAGS ?= -Wall -Wno-nonnull
 CPPFLAGS += -D_GNU_SOURCE -Isrc/include
-LDFLAGS ?=
 
 PYLIB  := $(shell python -c 'import distutils.sysconfig;  print distutils.sysconfig.get_python_lib()')
 
@@ -53,8 +62,8 @@ VPATH	+= src/hackbench
 	$(CC) -D VERSION_STRING=$(VERSION_STRING) -c $< $(CFLAGS) $(CPPFLAGS)
 
 # Pattern rule to generate dependency files from .c files
-%.d: %.c
-	@$(CC) -MM $(CFLAGS) $(CPPFLAGS) $< | sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' > $@ || rm -f $@
+#%.d: %.c
+#	@$(CC) -MM $(CFLAGS) $(CPPFLAGS) $< | sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' > $@ || rm -f $@
 
 .PHONY: all
 all: $(TARGETS) hwlatdetect
@@ -63,6 +72,9 @@ all: $(TARGETS) hwlatdetect
 -include $(sources:.c=.d)
 
 cyclictest: cyclictest.o librttest.a
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS) $(NUMA_LIBS)
+
+cyclictest_litmus: cyclictest_litmus.o librttest.a
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS) $(NUMA_LIBS)
 
 signaltest: signaltest.o librttest.a
